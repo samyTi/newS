@@ -1,0 +1,263 @@
+public class ALS_Transaction_TriggerHandler {
+for(Parcourire la liste des transactions){
+   ignoreTrxLevel1( transaction [i] );
+  if(La transaction doit etre ignoré ?){
+    Ignorer la Trx (set ignore to TRUE);
+  }
+  else{
+        Ne pas ignoré la Trx (set ignore to FALSE);
+        Diviser le montant de la trx par 100 parce que je recois au niveau du fichier le montant x 100;
+        Diviser le montant de la commission par 100 parce que je recois au niveau du fichier le montant x 100;
+
+  }
+}
+for(Parcourire la liste des transactions){
+
+            if(La transaction est ignoré ?){
+                continue;
+            }
+            ignoreTrxLevel2( transaction [i] );
+            if(La transaction doit etre ignoré ?){
+              
+                Ignorer la trx (set ignore to TRUE);
+                continue;
+            }
+            Ne pas ignoré la Trx (set ignore to Fals);
+            Initialiser paramMembre ( Map<String, String> );
+            for(Parcourire la liste des paramétres de fidélité){
+              Filtrer par date;
+              Filtrer par type de campagne;
+              filtrer par source;
+              Filtrer par type d operation;
+              Filtrer par point de vente;
+              Filtrer par BIN;
+            
+            if(filtreClientOk ?){
+                    Tous les filtres client sont passes avec succes;
+                    // --- paramMembre est une map Map<String, String>.
+                    // --- param.id est l'id du paramétre.
+                    // --- membreId est la concatenation entre l'id de la compagne et l'id du client.
+                    // --- membreIds est une liste de String qui contien les membreId.
+                    remplire paramMembre ( paramMembre.put(param.Id, membreId) );
+                    Ajouter membreId a la liste membreIds;
+                }
+            }
+            if(paramMembre est vide ?){
+                La transaction ne concerne aucune campagne  Elle sera ignorée; (set ignore to TRUE );
+                
+            }
+            else{
+              //trx.Als_Tech_Param_Membre__c = JSON.serialize(paramMembre);
+                Transformer paramMembre en format JSON dans la transaction ;
+                
+                if(client n'est pas vide ?){
+                    trx.Als_Client__c = client.Id;
+                }
+}
+for(Parcourire la liste membreIds){
+  Récuperer le membre de la map;
+  if(Membre vide ?){
+  Ajouter le membre a membresToInsert;
+  }
+}
+Inserer les nouveaux membres clients;
+Mise a jours des transactions;
+
+}
+
+private static Boolean ignoreTrxLevel1(Als_Transaction__c trx){
+
+        if(Date de la Trx est vide ?){
+             transaction ignorée;
+            return true;
+        }
+
+        if(Token et Num_Compte et Id_point_vente et CIN sont vide ?){
+            transaction ignorée;
+            return true;
+        }
+
+        if( Code_Operation est vide ? ){ transaction ignorée;
+            return true;
+        }
+        return false;
+    }
+
+    private static Boolean ignoreTrxLevel2(Als_Carte__c carte, Als_Compte_bancaire__c compteBancaire, Contact contact, Account commercant, Account mall){
+        if(carte et compteBancaire et contact et commercant et mall sont vide ?){
+            transactions ignorée;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static Boolean filterByDate(Als_Transaction__c trx, Als_Parametre_fidelite__c param){
+
+        Boolean debut = true;
+        if(la date de début de la compagne de fidélité du paramétre n'est pas vide et  superieur a date de trx ?){
+            debut = false;
+        }
+        if((debut est TRUE) et (la date de début de la compagne de fidélité du paramétre n'est pas vide et  superieur a date de trx) ?){
+            debut = false;
+        }
+        Boolean fin = true;
+        if(la date de fin de la compagne de fidélité du paramétre n'est pas vide et  inférieur a date de trx ?){
+            fin = false;
+        }
+        if((fin est TRUE) et (la date de fin de la compagne de fidélité du paramétre n'est pas vide et  inférieur a date de trx) ?){
+            fin = false;
+        }
+        if(debut et fin sont TRUE ?){
+            Filtre Date passé avec succes ;
+            return true;
+        }
+        else{
+            Le parametre Ne va pas etre pris en compte pour la trx;
+            return false;
+        }
+    }
+
+    private static Boolean filterByTypeOpt(Als_Transaction__c trx, Als_Parametre_fidelite__c param, Map<String, Als_CMI_Banque_Operations__c> banqueOpts, String cmiAccountId){
+        if(type d'opération du paramétre n'est pas vide ?){
+          //typOpts est une liste de String 
+          récupérer les types d'opération des paramétres dans typeOpts;
+            
+
+            
+            for(parcourire la liste typeOpts){
+                if(typeOpts[i] égale au code d'opération de la trx ?){
+                     Filtre Type d'operation passé avec succes pour ;
+                    return true;
+                }
+            }
+        }
+        Le parametre  Ne va pas etre pris en compte pour la trx;
+
+        return false;
+    }
+
+    public static Boolean filterBySource(Als_Transaction__c trx, Als_Parametre_fidelite__c param, String partnersToExclude){
+        
+        try{
+          //codeBanque; est un String
+            codeBanque = 
+            Code_Banque du commercant de la campagne de fidélité du paramétre;
+        }
+        catch(Exception ex){
+            codeBanque = vide;
+        }
+        if(Source trx est vide et partnersToExclude n'est pas vide et codeBanque n'est pas vide ?){
+            
+            if(partnersToExclude contient le codeBanque ?){
+                Le parametre  Ne va pas etre pris en compte pour la trx;
+                return false;
+            }
+        }
+
+        if(Source trx n'est pas vide et le code-Banquedu commercant de la campagne de fidélité du paramétre est différent de la source de la trx  ?){
+            Le parametre Ne va pas etre pris en compte pour la trx ;
+            return false;
+        }
+
+        Filtre source passé avec succes pour le parametre ;
+        return true;
+    }
+
+    public static Boolean filterByPdv(Als_Transaction__c trx, Als_Parametre_fidelite__c param){
+        
+        if(Filtre_Pdv du paramétre  égale a 'some' et Liste_points_vente du paramétre n'est pas vide  et Id_point_vente de la trx n'est pas vide ?){
+          //--- pdvTrx est un String qui contient le point de vente de la transaction.
+            String pdvTrx = ' ' + trx.Als_Id_point_vente__c + ' ';
+            //--- listPdvs est un String qui contient la liste des point de ventes inclus dans le paramétre. 
+            String listPdvs = ' ' + param.Als_Liste_points_vente__c + ' ';
+            if(listPdvs contiens pdvTrx ?){
+                Filtre Point de vente passé avec succes pour le parametre;
+                return true;
+            }
+        }
+
+        if(Filtre_Pdv du paramétre  égale a 'except' && Id_point_vente de la trx n'est pas vide ?){
+            if(Liste_points_vente du paramétre est vide ?){
+                Filtre Point de vente passé avec succes pour le parametre;
+                return true;
+            }
+            String pdvTrx = ' ' + trx.Als_Id_point_vente__c + ' ';
+            String listPdvs = ' ' + param.Als_Liste_points_vente__c + ' ';
+            if(listPdvs ne contien pas containspdvTrx ?){
+                Filtre Point de vente passé avec succes pour le parametre;
+                return true;
+            }
+        }
+
+        if(Filtre_Pdv du paramétre égale a 'all'){
+            
+            String typePartenaire = param.Als_Campagne_de_fidelite__r.Als_Commercant__r.Als_Type_commercant__c;
+            
+            if(typePartenaire n'est pas 'Commerçant' et n'est pas 'Mall' ?){
+                Filtre Point de vente passé avec succes pour le parametre;
+                return true;
+            }
+            else if(Liste_points_vente du parmétre n'est pas vide et Id_point_vente de la trx n'est pas vide ?){
+                String pdvTrx = ' ' + trx.Als_Id_point_vente__c + ' ';
+                String listPdvs = ' ' + param.Als_Liste_points_vente__c + ' ';
+                if(listPdvs contiens pdvTrx){
+                    Filtre Point de vente passé avec succes pour le parametre;
+                    return true;
+                }
+            }
+        }
+       Le parametre Ne va pas etre pris en compte pour la trx;
+        return false;
+
+    }
+private static Boolean filterByBIN(Als_Transaction__c trx, Als_Parametre_fidelite__c param){
+        //binTrx est un String qui contien le code_categorie de la trx.
+        String binTrx = trx.Als_Code_categorie__c;
+
+        if(Filtre_Bin du paramétre égale a 'some' ?){
+            if(Code_categorie du paramétre est vide ?){
+               Le parametre Ne va pas etre pris en compte pour la trx; 
+               return false;
+            }
+            else if(binTrx est vide ?){
+                
+                Le parametre
+                Ne va pas etre pris en compte pour la trx;
+                return false;
+            }
+            else {
+              //bins est une liste de String qui contien les code_Categorie du paramétre.
+                List<String> bins = param.Als_Code_categorie__c.split(',');
+                for(parcourire la liste bins){
+                    if(binTrx commence avec bins[i] ?){
+                        Filtre BIN passé avec succes pour le parametre;
+                        return true;
+                    }
+                }
+                Le parametre
+                Ne va pas etre pris en compte pour la trx;
+                return false;
+            }
+        }
+
+        if(Filtre_Bin du paramétre égale a 'except' ?){
+            if(binTrx est null ?){
+                Filtre BIN passé avec succes pour le parametre;
+                return true;
+            }
+            else if(Code_categorie du paramétre n'est pas vide ?){
+                List<String> bins = param.Als_Code_categorie__c.split(',');
+                for(parcourire la liste bins){
+                    if(bin n'est pas vide  et commence avec bins[i] ?){
+                        Le parametre Ne va pas etre pris en compte pour la trx;
+                        return false;
+                    }
+                }
+                Filtre BIN passé avec succes pour le parametre;
+                return true;
+            }
+        }
+        Filtre BIN passé avec succes pour le parametre ;
+        return true;
+    }
